@@ -15,6 +15,7 @@ sessionStorage.setItem('wi|', uuid)
 
 const WebInstance = {
     ON_NODETYPE_CHANGED: 'nodetypechanged',
+    ON_CONNECTION_STATUS: 'connectionstatus',
     NODE_MASTER: 'master',
     NODE_SLAVE: 'slave',
     
@@ -29,7 +30,7 @@ const WebInstance = {
 
     done(callback) {
         if (master) {
-            callback(nodeType())
+            callback(nodeType(), navigator.onLine ? 'online' : 'offline')
         } else {
             done = callback
         }
@@ -97,7 +98,7 @@ function masterChanged() {
     let fn = done || events[WebInstance.ON_NODETYPE_CHANGED]
 
     done = null
-    fn && fn(nodeType())
+    fn && fn(nodeType(), navigator.onLine ? 'online' : 'offline')
 }
 
 function nodeType() {
@@ -221,6 +222,16 @@ window.addEventListener('storage', ({key, newValue}) => {
 
 window.addEventListener('unload', function() {
     WebInstance.send('__died__')
+})
+
+window.addEventListener('online', () => {
+    let fn = events[WebInstance.ON_CONNECTION_STATUS]
+    fn && fn('online')
+})
+
+window.addEventListener('offline', () => {
+    let fn = events[WebInstance.ON_CONNECTION_STATUS]
+    fn && fn('offline')
 })
 
 chooseMaster()

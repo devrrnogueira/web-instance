@@ -1,5 +1,9 @@
 <template>
-    <h3>{{nodeType === null ? 'Initializing...' : nodeType}} - {{uuid}}</h3>
+    <h3>
+        <span>{{nodeType === null ? 'Initializing...' : nodeType}}</span>
+        <span> - {{uuid}} - </span> 
+        <span :style="`color:${status=='online'?'blue':'red'}`">{{status}}</span>
+    </h3>
     <button @click="doSendMessage">Send Message</button>
     <div>
         <div v-for="(item, index) in messages" :key="index" :class="item.type">
@@ -16,18 +20,23 @@ export default {
     data: () => ({
         nodeType: null,
         uuid: null,
-        messages: []
+        messages: [],
+        status: null
     }),
     
     created() {
         this.uuid = WebInstance.uuid()
 
         WebInstance
-            .done((nodetype) => {
+            .done((nodetype, statusName) => {
                 this.nodeType = nodetype
+                this.status = statusName
             })
             .on(WebInstance.ON_NODETYPE_CHANGED, (nodetype) => {
                 this.nodeType = nodetype
+            })
+            .on(WebInstance.ON_CONNECTION_STATUS, (statusName) => {
+                this.status = statusName
             })
 
         WebInstance.on('hi', (event) => {

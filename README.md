@@ -12,11 +12,15 @@ import WebInstance from 'web-instance'
 
 // The basic
 WebInstance
-    .done((nodetype) => {
+    .done((nodetype, status) => {
         console.log(nodetype) // master or slave
+        console.log(status) // online or offline
     })
     .on(WebInstance.ON_NODETYPE_CHANGED, (nodetype) => {
         console.log(nodetype) // master or slave
+    })
+    .on(WebInstance.ON_CONNECTION_STATUS, (status) => {
+        console.log(status) // online or offline
     })
 
 // Listening to a specific message
