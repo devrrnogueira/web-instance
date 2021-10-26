@@ -198,12 +198,18 @@ function garbageCollection() {
 }
 
 window.addEventListener('storage', ({key, newValue}) => {
-    let event
+    let event, value
     let fn = watchs[key]
     
     // tem alguém observando essa chave
     if (fn) {
-        return fn(JSON.parse(newValue || 'null'))
+        try {
+            value = JSON.parse(newValue || 'null')
+        } catch (e) {
+            value = newValue
+        }
+
+        return fn(value)
     }
 
     // chave excluída ou não é uma mensagem da WebInstance
