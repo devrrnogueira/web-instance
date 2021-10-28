@@ -16,6 +16,10 @@ WebInstance
         console.log(nodetype) // master or slave
         console.log(status) // online or offline
     })
+    .nextTick(() => {
+        // this function will be called every x miliseconds, only while online
+        // check WebInstance.tickMs
+    })
     .on(WebInstance.ON_NODETYPE_CHANGED, (nodetype) => {
         console.log(nodetype) // master or slave
     })
