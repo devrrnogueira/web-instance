@@ -3,13 +3,13 @@
 import Queue from './Queue'
 import Util from './Util'
 
+let master, nexttick, init
 let watchs = {}
 let events = {}
 let done = null
 let timeout = 400
 let responses = {}
 let uuid = Util.uuid()
-let master
 
 sessionStorage.setItem('wi|', uuid)
 
@@ -25,6 +25,11 @@ const WebInstance = {
 
     timeout(ms) {
         timeout = ms
+        return this
+    },
+
+    tickMs(ms) {
+        tickms = ms
         return this
     },
 
@@ -60,6 +65,12 @@ const WebInstance = {
         return WebInstance
             .send('__exists__', uuid)
             .then(res => res.length > 0)
+    },
+
+    nextTick(callback) {
+        nexttick = callback
+        nextTick()
+        return this
     }
 }
 
@@ -97,7 +108,9 @@ WebInstance.watch('master', () => {
 function masterChanged() {
     let fn = done || events[WebInstance.ON_NODETYPE_CHANGED]
 
+    init = true
     done = null
+
     fn && fn(nodeType(), navigator.onLine ? 'online' : 'offline')
 }
 
@@ -134,6 +147,27 @@ function send(name, message, to = '', toMessage = '') {
                 Queue.next()
             })
     })
+}
+
+let tm
+let tickms = 5000
+function nextTick() {
+    clearTimeout(tm)
+
+    if (!nexttick) {
+        return
+    }
+
+    if (!init) {
+        return tm = setTimeout(nextTick, 1000)
+    }
+
+    if (!navigator.onLine) {
+        return tm = setTimeout(nextTick, 2000)
+    }
+
+    tm = setTimeout(nextTick, tickms)
+    nexttick(nodeType())
 }
 
 /**
