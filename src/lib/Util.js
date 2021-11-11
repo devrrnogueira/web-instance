@@ -1,6 +1,6 @@
 // @ts-check
 
-const uuid = sessionStorage.getItem('wi|') || String(parseInt(String(Math.random() * 10000)))
+const uuid = sessionStorage.getItem('wi|') || String(Date.now())
 const uuidKey = `wi|${uuid}`
 
 const Util = {
