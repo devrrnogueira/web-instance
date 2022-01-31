@@ -151,7 +151,7 @@ function send(name, message, to = '', toMessage = '') {
 
 let tm
 let tickms = 5000
-function nextTick() {
+async function nextTick() {
     clearTimeout(tm)
 
     if (!nexttick) {
@@ -166,6 +166,8 @@ function nextTick() {
         return tm = setTimeout(nextTick, 2000)
     }
 
+    await chooseMaster()
+    
     tm = setTimeout(nextTick, tickms)
     nexttick(nodeType())
 }
@@ -201,9 +203,9 @@ function onResponseReceived(event) {
 
 // elege o master
 async function chooseMaster() {
-    let nodes
+    let nodes, oldMaster
     
-    master = localStorage.getItem('master') || uuid
+    master = oldMaster =localStorage.getItem('master') || uuid
     
     if (master != uuid) {
         nodes = await WebInstance.broadcast()
@@ -213,8 +215,10 @@ async function chooseMaster() {
         master = nodes.reduce((value, item) => (item.from < value ? item.from : value), nodes[0].from)
     }
 
-    localStorage.setItem('master', master)
-    masterChanged()
+    if (!master || (master && master != oldMaster)) {
+        localStorage.setItem('master', master)
+        masterChanged()
+    }
 }
 
 function garbageCollection() {
