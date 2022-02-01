@@ -3,13 +3,14 @@
 import Queue from './Queue'
 import Util from './Util'
 
-let master, nexttick, init
+let master, nexttick, init, tm
 let watchs = {}
 let events = {}
 let done = null
 let timeout = 400
 let responses = {}
 let uuid = Util.uuid()
+let tickms = 5000
 
 sessionStorage.setItem('wi|', uuid)
 
@@ -149,9 +150,7 @@ function send(name, message, to = '', toMessage = '') {
     })
 }
 
-let tm
-let tickms = 5000
-async function nextTick() {
+function nextTick() {
     clearTimeout(tm)
 
     if (!nexttick) {
@@ -165,8 +164,6 @@ async function nextTick() {
     if (!navigator.onLine) {
         return tm = setTimeout(nextTick, 2000)
     }
-
-    await chooseMaster()
     
     tm = setTimeout(nextTick, tickms)
     nexttick(nodeType())
